@@ -7,7 +7,8 @@ from .const import DATA_OMADA, DOMAIN
 
 LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = ["device_tracker"]
+PLATFORMS = ["device_tracker", "sensor"]
+
 
 async def async_setup(hass, config):
     conf = config.get(DOMAIN)
@@ -19,10 +20,13 @@ async def async_setup(hass, config):
         return True
 
     hass.async_create_task(
-        hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_IMPORT}, data=conf)
+        hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": SOURCE_IMPORT}, data=conf
+        )
     )
 
     return True
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
@@ -31,17 +35,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     hass.config_entries.async_setup_platforms(entry, PLATFORMS)
 
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
-        DATA_OMADA: controller
-    }
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {DATA_OMADA: controller}
 
     return True
+
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     controller = hass.data[DOMAIN].pop(entry.entry_id)[DATA_OMADA]
     return await controller.async_close()
 
+
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry):
     pass
     # Recreate controller object with new options
-
